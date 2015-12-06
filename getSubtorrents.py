@@ -129,7 +129,7 @@ def manageTorrents():
 def sendMsg(t):
   ems = smtplib.SMTP('smtp.gmail.com:587')
   ems.starttls()
-  ems.login('maldonadoga.raspberrypi@gmail.com', 'R3dHatL1nux')
+  ems.login('user@gmail.com', 'password')
   subject = t.name + ' completed'
   message = 'HashString: {0} Name {1} Added date: {2} Done date: {3}'.format(t.hashString, t.name, t.addedDate, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
   ems.sendmail('maldonadoga.raspberrypi@gmail.com', 'maldonadoga@hotmail.com', 'Subject: {0}\r\n{1}'.format(subject, message))
