@@ -14,6 +14,7 @@ import re
 import os
 import smtplib
 import datetime
+from email.mime.text import MIMEText
 #
 ## Init
 db = sqlite3.connect("/home/destroyer/getTorrent/getTorrent.db")
@@ -106,7 +107,7 @@ def addTorrents(torrents):
     if title.fetchone()[0] < t[3]:
       cursor.execute('UPDATE title SET pubDate = ? WHERE sourceId = ? AND titleId = ?', (t[3], sourceId, t[0]))        
       db.commit()
-    print('{0} - {1}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), t))
+    print('{0} - Added torrent: {1}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), t))
 
 def manageTorrents():
   torrents = tc.get_torrents()
@@ -129,15 +130,16 @@ def manageTorrents():
 def sendMsg(t):
   ems = smtplib.SMTP('smtp.gmail.com:587')
   ems.starttls()
-  ems.login('user@gmail.com', 'password')
-  subject = t.name + ' completed'
-  message = 'HashString: {0} Name {1} Added date: {2} Done date: {3}'.format(t.hashString, t.name, t.addedDate, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-  ems.sendmail('maldonadoga.raspberrypi@gmail.com', 'maldonadoga@hotmail.com', 'Subject: {0}\r\n{1}'.format(subject, message))
+  ems.login('maldonadoga.raspberrypi@gmail.com', 'password')
+  msg = MIMEText('HashString: {0} Name {1} Added date: {2} Done date: {3}'.format(t.hashString, t.name, t.addedDate, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')));
+  msg['From'] = 'maldonadoga.raspberrypi@gmail.com'
+  msg['To'] = 'maldonadoga@hotmail.com, rosybadilloa@hotmail.com, makstefy@hotmail.com'
+  msg['Subject'] = t.name + ' completed!'
+  ems.send_message(msg)
   ems.quit()
   cursor.execute('UPDATE torrents SET mailSent = 1, doneDate = datetime() WHERE hashString = ?', (t.hashString,))
   db.commit()
-  return doneDate
-
+  
 srcTorrent = getSrc(sourceId)
 myTitles = getTitles(sourceId)
 Rss = getRss()
