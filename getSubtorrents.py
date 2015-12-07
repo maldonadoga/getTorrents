@@ -16,7 +16,7 @@ import smtplib
 import datetime
 #
 ## Init
-db = sqlite3.connect("~/projects/getTorrent/getTorrent.db")
+db = sqlite3.connect("/home/destroyer/getTorrent/getTorrent.db")
 cursor = db.cursor()
 p = re.compile('\d+[x]\d+', re.IGNORECASE)
 hconn = http.client.HTTPConnection('www.subtorrents.com')
@@ -122,7 +122,7 @@ def manageTorrents():
       else:
         cursor.execute('UPDATE torrents SET status = ? WHERE hashString = ?', (t.status, t.hashString))
         db.commit()
-      if t.status == 'seeding' and (t.uploadRatio >= 1 or (datetime.datetime.now() - datetime.datetime.strptime(dbt[1], '%Y-%m-%d %H:%M:%S')).days >= 1):
+      if t.status == 'seeding' and dbt[1] and (t.uploadRatio >= 1 or (datetime.datetime.now() - datetime.datetime.strptime(dbt[1], '%Y-%m-%d %H:%M:%S')).days >= 1):
         tc.remove_torrent(t.hashString)
         print('{0} - Removed torrent: {1} UploadRatio: {2} DoneDate: {3}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), t.name, t.uploadRatio, dbt[1]))
 
@@ -136,6 +136,7 @@ def sendMsg(t):
   ems.quit()
   cursor.execute('UPDATE torrents SET mailSent = 1, doneDate = datetime() WHERE hashString = ?', (t.hashString,))
   db.commit()
+  return doneDate
 
 srcTorrent = getSrc(sourceId)
 myTitles = getTitles(sourceId)
